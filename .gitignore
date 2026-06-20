@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+
+config/groq_key.txt
+config/gemini_key.txt
+
+backups/
+notes/
+
+.env
+
+*.zip
+
+.vscode/
+.idea/
