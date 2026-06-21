@@ -2,25 +2,38 @@
 
 echo "[ShadowBeast] Installing..."
 
-# Ensure python exists
-pkg install python -y
+Update package lists
 
-# Optional: upgrade pip
-pip install --upgrade pip
+pkg update -y
 
-# Install dependencies if requirements exist
-if [ -f requirements.txt ]; then
-    pip install -r requirements.txt
-fi
+Install required packages
 
-# Create global command
-cat > $PREFIX/bin/shadowbeast << 'EOF'
+pkg install -y python git
+
+Install Python dependencies
+
+pip install -r requirements.txt
+
+Save project location
+
+PROJECT_DIR="$(pwd)"
+
+Create launcher
+
+cat > "$PREFIX/bin/shadowbeast" << EOF
 #!/data/data/com.termux/files/usr/bin/bash
-cd "$HOME/shadowbeast-assistant" || exit
-python main.py
+
+cd "$PROJECT_DIR"
+python main.py "$@"
 EOF
 
-chmod +x $PREFIX/bin/shadowbeast
+Make launcher executable
 
+chmod +x "$PREFIX/bin/shadowbeast"
+
+echo
 echo "[ShadowBeast] Installation complete."
-echo "Run: shadowbeast"
+echo "You can now run ShadowBeast from anywhere using:"
+echo
+echo "    shadowbeast"
+echo
