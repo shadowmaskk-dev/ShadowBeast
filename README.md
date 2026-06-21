@@ -34,7 +34,7 @@ Installation
 
 Clone the repository:
 
-git clone https://github.com/shadowmaskk-dev/shadowbeast-termux-terminal-ai-assistant.git
+git clone https://github.com/shadowmaskk-dev/ShadowBeast.git
 
 cd ShadowBeast
 
