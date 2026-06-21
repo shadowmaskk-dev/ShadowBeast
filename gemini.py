@@ -4,6 +4,15 @@ from config import (
     get_gemini_key
 )
 
+from context import (
+    SYSTEM_PROMPT
+)
+
+from memory_manager import (
+    conversation,
+    add_message
+)
+
 MODEL = "gemini-2.5-flash"
 
 
@@ -17,6 +26,70 @@ def gemini_chat(prompt):
             "Gemini API key not set."
         )
 
+    add_message(
+        "user",
+        prompt
+    )
+
+    # Convert shared conversation
+    # into Gemini format
+
+    history = []
+
+    for message in conversation:
+
+        role = message.get(
+            "role",
+            "user"
+        )
+
+        text = message.get(
+            "content",
+            ""
+        )
+
+        # Gemini does not support
+        # "system" role directly
+
+        if role == "system":
+
+            history.append(
+                {
+                    "role": "user",
+                    "parts": [
+                        {
+                            "text": text
+                        }
+                    ]
+                }
+            )
+
+        elif role == "assistant":
+
+            history.append(
+                {
+                    "role": "model",
+                    "parts": [
+                        {
+                            "text": text
+                        }
+                    ]
+                }
+            )
+
+        else:
+
+            history.append(
+                {
+                    "role": "user",
+                    "parts": [
+                        {
+                            "text": text
+                        }
+                    ]
+                }
+            )
+
     url = (
         "https://generativelanguage.googleapis.com"
         f"/v1beta/models/{MODEL}:generateContent"
@@ -24,21 +97,7 @@ def gemini_chat(prompt):
     )
 
     payload = {
-
-        "contents": [
-
-            {
-                "parts": [
-
-                    {
-                        "text": prompt
-                    }
-
-                ]
-            }
-
-        ]
-
+        "contents": history
     }
 
     try:
@@ -53,7 +112,7 @@ def gemini_chat(prompt):
 
         data = response.json()
 
-        return data[
+        reply = data[
             "candidates"
         ][0][
             "content"
@@ -62,6 +121,13 @@ def gemini_chat(prompt):
         ][0][
             "text"
         ]
+
+        add_message(
+            "assistant",
+            reply
+        )
+
+        return reply
 
     except Exception as e:
 

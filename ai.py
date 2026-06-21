@@ -1,121 +1,32 @@
 import requests
-import json
-import os
 
-from config import (
-    get_groq_key
-)
+from config import get_groq_key
 
 from database import (
     add_unknown_topic
 )
 
-SYSTEM_PROMPT = """
-You are ShadowBeast, an AI assistant running in Termux.
-
-Environment:
-- Running inside a terminal.
-- Responses are displayed as plain text.
-
-Response Rules:
-- Use plain text only.
-- Do not use markdown.
-- Do not use **bold**.
-- Do not use *italic*.
-- Do not use headings.
-- Keep answers concise.
-- Give practical answers.
-- For code, provide code and explanation.
-- Prefer short paragraphs.
-"""
-
-conversation = [
-    {
-        "role": "system",
-        "content": SYSTEM_PROMPT
-    }
-]
-
-
-def save_memory():
-
-    os.makedirs(
-        "memory",
-        exist_ok=True
-    )
-
-    with open(
-        "memory/chat.json",
-        "w",
-        encoding="utf-8"
-    ) as f:
-
-        json.dump(
-            conversation,
-            f,
-            indent=2
-        )
-
-
-def load_memory():
-
-    global conversation
-
-    if os.path.exists(
-        "memory/chat.json"
-    ):
-
-        try:
-
-            with open(
-                "memory/chat.json",
-                "r",
-                encoding="utf-8"
-            ) as f:
-
-                conversation = json.load(f)
-
-        except Exception:
-
-            pass
-
-
-def reset_chat():
-
-    global conversation
-
-    conversation = [
-        {
-            "role": "system",
-            "content": SYSTEM_PROMPT
-        }
-    ]
-
-    save_memory()
+from memory_manager import (
+    conversation,
+    add_message
+)
 
 
 def ai_chat(prompt):
 
-    global conversation
-
     api_key = get_groq_key()
 
-    conversation.append(
-        {
-            "role": "user",
-            "content": prompt
-        }
-    )
+    if not api_key:
 
-    # Keep conversation size reasonable
-
-    if len(conversation) > 40:
-
-        conversation = (
-            conversation[:1]
-            +
-            conversation[-39:]
+        return (
+            "Groq API key not set.\n"
+            "Use: set groq <api_key>"
         )
+
+    add_message(
+        "user",
+        prompt
+    )
 
     headers = {
         "Authorization":
@@ -150,14 +61,10 @@ def ai_chat(prompt):
             "content"
         ]
 
-        conversation.append(
-            {
-                "role": "assistant",
-                "content": reply
-            }
+        add_message(
+            "assistant",
+            reply
         )
-
-        save_memory()
 
         return reply
 
@@ -171,6 +78,3 @@ def ai_chat(prompt):
             f"Error: {e}\n\n"
             "Topic added to learning queue."
         )
-
-
-load_memory()
