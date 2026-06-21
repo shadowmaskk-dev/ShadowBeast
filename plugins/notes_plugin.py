@@ -1,9 +1,7 @@
 import json
 import os
 
-NOTES_FILE = (
-    "notes/notes.json"
-)
+NOTES_FILE = "notes/notes.json"
 
 
 def load_notes():
@@ -11,7 +9,6 @@ def load_notes():
     if not os.path.exists(
         NOTES_FILE
     ):
-
         return []
 
     try:
@@ -53,6 +50,8 @@ def handle(command):
 
     lower = command.lower()
 
+    # Add Note
+
     if lower.startswith(
         "note add "
     ):
@@ -85,7 +84,12 @@ def handle(command):
 
         return True
 
-    if lower == "notes":
+    # List Notes
+
+    if lower in (
+        "notes",
+        "note list"
+    ):
 
         notes = load_notes()
 
@@ -110,12 +114,118 @@ def handle(command):
 
         return True
 
+    # Read Note
+
+    if lower.startswith(
+        "note read "
+    ):
+
+        try:
+
+            index = int(
+                command[
+                    10:
+                ].strip()
+            ) - 1
+
+            notes = load_notes()
+
+            if (
+                index < 0
+                or index >= len(notes)
+            ):
+
+                print(
+                    "Invalid note."
+                )
+
+                return True
+
+            print(
+                f"\n[{index + 1}]"
+            )
+
+            print(
+                notes[index]
+            )
+
+        except Exception:
+
+            print(
+                "Usage: note read <id>"
+            )
+
+        return True
+
+    # Edit Note
+
+    if lower.startswith(
+        "note edit "
+    ):
+
+        try:
+
+            index = int(
+                command[
+                    10:
+                ].strip()
+            ) - 1
+
+            notes = load_notes()
+
+            if (
+                index < 0
+                or index >= len(notes)
+            ):
+
+                print(
+                    "Invalid note."
+                )
+
+                return True
+
+            print(
+                f"Current: {notes[index]}"
+            )
+
+            new_text = input(
+                "New text: "
+            ).strip()
+
+            if not new_text:
+
+                print(
+                    "Edit cancelled."
+                )
+
+                return True
+
+            notes[index] = new_text
+
+            save_notes(
+                notes
+            )
+
+            print(
+                "Note updated."
+            )
+
+        except Exception:
+
+            print(
+                "Usage: note edit <id>"
+            )
+
+        return True
+
+    # Search Notes
+
     if lower.startswith(
         "note search "
     ):
 
         keyword = command[
-            12:
+            13:
         ].strip().lower()
 
         notes = load_notes()
@@ -144,6 +254,8 @@ def handle(command):
             )
 
         return True
+
+    # Delete Note
 
     if lower.startswith(
         "note delete "

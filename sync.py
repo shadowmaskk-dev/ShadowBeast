@@ -2,7 +2,7 @@ import os
 import json
 import requests
 
-from config import GROQ_API_KEY
+from config import get_groq_key
 
 UNKNOWN_FILE = "database/unknown_topics.json"
 GENERAL_FOLDER = "database/general"
@@ -14,16 +14,28 @@ def sync_database():
         print("No learning queue found.")
         return
 
-    with open(
-        UNKNOWN_FILE,
-        "r",
-        encoding="utf-8"
-    ) as f:
+    try:
+        with open(
+            UNKNOWN_FILE,
+            "r",
+            encoding="utf-8"
+        ) as f:
+            topics = json.load(f)
 
-        topics = json.load(f)
+    except Exception as e:
+        print(
+            f"Failed to load learning queue: {e}"
+        )
+        return
 
     if not topics:
         print("No pending topics.")
+        return
+
+    api_key = get_groq_key()
+
+    if not api_key:
+        print("Groq API key not set.")
         return
 
     remaining = []
@@ -44,7 +56,7 @@ def sync_database():
 
         headers = {
             "Authorization":
-                f"Bearer {GROQ_API_KEY}",
+                f"Bearer {api_key}",
             "Content-Type":
                 "application/json"
         }
@@ -55,8 +67,7 @@ def sync_database():
             "messages": [
                 {
                     "role": "system",
-                    "content":
-                    """
+                    "content": """
 Create a concise educational note.
 
 Include:
@@ -116,7 +127,6 @@ Plain text only.
                 "w",
                 encoding="utf-8"
             ) as f:
-
                 f.write(answer)
 
             print(
@@ -133,18 +143,29 @@ Plain text only.
 
             remaining.append(item)
 
-    with open(
-        UNKNOWN_FILE,
-        "w",
-        encoding="utf-8"
-    ) as f:
+    try:
+        with open(
+            UNKNOWN_FILE,
+            "w",
+            encoding="utf-8"
+        ) as f:
 
-        json.dump(
-            remaining,
-            f,
-            indent=4
+            json.dump(
+                remaining,
+                f,
+                indent=4
+            )
+
+    except Exception as e:
+        print(
+            f"Failed to update queue: {e}"
         )
 
     print(
         "\nSync complete."
     )
+
+
+if __name__ == "__main__":
+    sync_database()
+

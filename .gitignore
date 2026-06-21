@@ -1,15 +1,41 @@
-__pycache__/
+Python
+
+pycache/
 *.pyc
+*.pyo
+*.pyd
+
+Virtual environments
+
+venv/
+.env/
+
+API keys
 
 config/groq_key.txt
 config/gemini_key.txt
 
-backups/
+User data
+
+memory/
 notes/
+database/general/
+database/unknown_topics.json
 
-.env
+Backups
 
-*.zip
+backups/
 
-.vscode/
-.idea/
+Logs
+
+*.log
+
+OS files
+
+.DS_Store
+Thumbs.db
+
+Git metadata backups
+
+*.bak
+*.tmp

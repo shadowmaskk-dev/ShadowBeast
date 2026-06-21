@@ -6,7 +6,6 @@ from config import (
     get_groq_key
 )
 
-API_KEY = get_groq_key()
 from database import (
     add_unknown_topic
 )
@@ -99,6 +98,8 @@ def ai_chat(prompt):
 
     global conversation
 
+    api_key = get_groq_key()
+
     conversation.append(
         {
             "role": "user",
@@ -118,7 +119,7 @@ def ai_chat(prompt):
 
     headers = {
         "Authorization":
-            f"Bearer {GROQ_API_KEY}",
+            f"Bearer {api_key}",
         "Content-Type":
             "application/json"
     }
